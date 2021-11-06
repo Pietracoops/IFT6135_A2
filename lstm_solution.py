@@ -111,7 +111,21 @@ class LSTM(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        mass1 = log_probas
+        mass2 = targets
+        mass3 = mask
+
+        #mass4 = torch.min(log_probas,2)
+        log_probas_output = log_probas[0].gather(1, targets)        # Grab the log probability at the given target token
+        log_probas_output = log_probas_output * mask                # Multiply the tensor by the mask to 0 out non-used entries
+        log_probas_output = torch.sum(log_probas_output, dim=0)     # Sum up the log probabilities for a set of 256
+        T_values = torch.count_nonzero(mask, dim=0)                 # Determine the value of T by counting non-zeros
+        log_probas_output = log_probas_output / T_values            # Divide by T
+        log_probas_output = torch.mean(log_probas_output, dim=0)    # Find mean of log probability across batch size
+
+        return -1 * log_probas_output                               # Multiply by negative 1
         pass
+        # ==========================
 
     def initial_states(self, batch_size, device=None):
         if device is None:

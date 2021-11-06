@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 class LSTM(nn.Module):
     def __init__(
         self,
@@ -75,7 +74,13 @@ class LSTM(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-        pass
+        embeds = self.embedding(inputs)
+        lstm_out, hidden_states = self.lstm(embeds, hidden_states)
+        tag_space = self.classifier(lstm_out)
+        log_probas = F.log_softmax(tag_space, dim=1)
+        return log_probas, hidden_states
+        # ==========================
+
 
     def loss(self, log_probas, targets, mask):
         """Loss function.

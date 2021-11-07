@@ -1,5 +1,6 @@
 import unittest
 import torch
+import torch.nn.functional as F
 
 from gradescope_utils.autograder_utils.decorators import weight
 

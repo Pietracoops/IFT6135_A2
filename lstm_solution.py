@@ -74,6 +74,7 @@ class LSTM(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+
         embeds = self.embedding(inputs)
         lstm_out, hidden_states = self.lstm(embeds, hidden_states)
         tag_space = self.classifier(lstm_out)
@@ -111,11 +112,6 @@ class LSTM(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-        mass1 = log_probas
-        mass2 = targets
-        mass3 = mask
-
-        #mass4 = torch.min(log_probas,2)
         log_probas_output = log_probas[0].gather(1, targets)        # Grab the log probability at the given target token
         log_probas_output = log_probas_output * mask                # Multiply the tensor by the mask to 0 out non-used entries
         log_probas_output = torch.sum(log_probas_output, dim=0)     # Sum up the log probabilities for a set of 256

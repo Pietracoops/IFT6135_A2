@@ -40,7 +40,32 @@ class LayerNorm(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+
+        ## Testing
+        #mass = nn.LayerNorm(self.hidden_size)
+        #output = mass(inputs)
+        #output_flat = torch.flatten(output, start_dim=0, end_dim=(3))
+
+        size_obj = inputs.size()
+        input_rank = len(inputs.shape)
+        inputs_flat = torch.flatten(inputs, start_dim=0, end_dim=(input_rank - 2))
+        inputs_unflattened = torch.reshape(inputs_flat, size_obj)
+
+        E = (1 / self.hidden_size) * (torch.sum(inputs_flat, dim=1))
+        for i in range(0, inputs_flat.shape[0]):
+            torch.sub(inputs_flat[i], E[i])
+        sigma_sq = (1 / self.hidden_size) * torch.sum(torch.square(inputs_flat), dim=1)
+
+        for i in range(0, inputs_flat.shape[0]):
+            for j in range(0, inputs_flat.shape[1]):
+                inputs_flat[i][j] = (inputs_flat[i][j] - E[i]) / torch.sqrt(sigma_sq[i] + self.eps) * self.weight[j] + self.bias[j]
+
+        # Unflatten to get back original shape
+        inputs_unflattened = torch.reshape(inputs_flat, size_obj)
+        return inputs_unflattened
+
         pass
+        # ==========================
 
     def reset_parameters(self):
         nn.init.ones_(self.weight)

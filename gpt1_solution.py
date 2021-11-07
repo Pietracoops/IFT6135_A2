@@ -49,7 +49,6 @@ class LayerNorm(nn.Module):
         size_obj = inputs.size()
         input_rank = len(inputs.shape)
         inputs_flat = torch.flatten(inputs, start_dim=0, end_dim=(input_rank - 2))
-        inputs_unflattened = torch.reshape(inputs_flat, size_obj)
 
         E = (1 / self.hidden_size) * (torch.sum(inputs_flat, dim=1))
         for i in range(0, inputs_flat.shape[0]):

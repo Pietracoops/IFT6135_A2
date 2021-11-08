@@ -79,6 +79,7 @@ class LSTM(nn.Module):
         lstm_out, hidden_states = self.lstm(embeds, hidden_states)
         tag_space = self.classifier(lstm_out)
         log_probas = F.log_softmax(tag_space, dim=1)
+
         return log_probas, hidden_states
         # ==========================
 
@@ -113,30 +114,21 @@ class LSTM(nn.Module):
         # TODO: Write your code here
         # ==========================
         # Edit: As hinted at by Leo, the question can be solved without loops by using the reduction and ignore_index parameters of torch.nn.functional.nll_loss().
-        log_probas_output = log_probas[0].gather(1, targets)        # Grab the log probability at the given target token
-        log_probas_output = log_probas_output * mask                # Multiply the tensor by the mask to 0 out non-used entries
-        log_probas_output = torch.sum(log_probas_output, dim=0)     # Sum up the log probabilities for a set of 256
-        T_values = torch.count_nonzero(mask, dim=0)                 # Determine the value of T by counting non-zeros
-        log_probas_output = log_probas_output / T_values            # Divide by T
-        log_probas_output = torch.mean(log_probas_output, dim=0)    # Find mean of log probability across batch size
 
-        return -1 * log_probas_output                               # Multiply by negative 1
+        #mask = mask.unsqueeze(2).repeat(1, 1, log_probas.shape[2])
+        #log_probas_output = log_probas * mask
+        log_probas_output = torch.reshape(log_probas, [log_probas.shape[0], log_probas.shape[2], log_probas.shape[1]])
+        log_probas_output = torch.nn.functional.nll_loss(log_probas_output, targets, ignore_index=0, reduction='mean')
+
+        #log_probas_output = log_probas[0].gather(1, targets)        # Grab the log probability at the given target token
+        #log_probas_output = log_probas_output * mask                # Multiply the tensor by the mask to 0 out non-used entries
+        #log_probas_output = torch.sum(log_probas_output, dim=0)     # Sum up the log probabilities for a set of 256
+        #T_values = torch.count_nonzero(mask, dim=0)                 # Determine the value of T by counting non-zeros
+        #log_probas_output = log_probas_output / T_values            # Divide by T
+        #log_probas_output = torch.mean(log_probas_output, dim=0)    # Find mean of log probability across batch size
+#
+        return log_probas_output
         pass
-
-        # for i in range(log_probas.shape[0]):
-        #         # get the log probas of the target for one sample
-        #         sample = log_probas[i, torch.arange(log_probas.shape[1]), targets[i]]
-        #         
-        #          # place the results in the full tensor
-        #         if (i > 1):
-        #                 predictions = torch.cat((predictions, torch.unsqueeze(sample, dim=0)), dim=0)
-        #         elif (i == 1):
-        #             predictions = torch.stack((predictions, sample), dim=0)
-        #         else:
-        #             predictions = sample
-
-
-
         # ==========================
 
     def initial_states(self, batch_size, device=None):

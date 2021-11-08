@@ -25,3 +25,15 @@ There is no limit on the number of Gradescope submissions you can make. You can 
 Cheers,
 
 Leo
+
+
+
+
+
+1.2:
+Remember that targets is a 2D array, so targets[i] will return a whole row of indices.
+Although you shouldn't be using the elements of targets to index from log_probas anyway for this problem, because there are built-in PyTorch functions that will lookup the probability of the correct index in the vocabulary directly from the target array.
+
+I suggest you look at the page for torch.nn.functional.nll_loss() to see what it is expecting as input. This function will accept the full log_probas and targets matrices as they are (although note it expects the dimensions to be in a specific order) which removes the need to make your own list of samples for the correct outputs.
+
+for mask: The hint is to have a look at the reduction parameter of the function.

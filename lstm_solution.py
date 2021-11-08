@@ -112,6 +112,7 @@ class LSTM(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        # Edit: As hinted at by Leo, the question can be solved without loops by using the reduction and ignore_index parameters of torch.nn.functional.nll_loss().
         log_probas_output = log_probas[0].gather(1, targets)        # Grab the log probability at the given target token
         log_probas_output = log_probas_output * mask                # Multiply the tensor by the mask to 0 out non-used entries
         log_probas_output = torch.sum(log_probas_output, dim=0)     # Sum up the log probabilities for a set of 256
@@ -121,6 +122,21 @@ class LSTM(nn.Module):
 
         return -1 * log_probas_output                               # Multiply by negative 1
         pass
+
+        # for i in range(log_probas.shape[0]):
+        #         # get the log probas of the target for one sample
+        #         sample = log_probas[i, torch.arange(log_probas.shape[1]), targets[i]]
+        #         
+        #          # place the results in the full tensor
+        #         if (i > 1):
+        #                 predictions = torch.cat((predictions, torch.unsqueeze(sample, dim=0)), dim=0)
+        #         elif (i == 1):
+        #             predictions = torch.stack((predictions, sample), dim=0)
+        #         else:
+        #             predictions = sample
+
+
+
         # ==========================
 
     def initial_states(self, batch_size, device=None):

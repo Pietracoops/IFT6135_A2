@@ -127,7 +127,36 @@ class MultiHeadedAttention(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        # Transpose key matrix
+        d = queries.size()[-1]
+        keys_t = torch.transpose(keys, dim0=2, dim1=3)
+        attn_logits = torch.matmul(queries, keys_t)
+
+        attn_logits = attn_logits / math.sqrt(d)
+
+        # Perform softmax with mask
+        softm_d = torch.exp(attn_logits)
+        softm_d = torch.sum(softm_d, dim=3) # Denom of softmax
+
+        # Create mask
+        mask = torch.zeros([attn_logits.shape[2], attn_logits.shape[3]])
+        for i in range(0, mask.shape[0]):
+            for j in range(0, mask.shape[1]):
+                if (j <= i):
+                    mask[i][j] = 1
+        mask = mask.unsqueeze(0).repeat(attn_logits.shape[0], attn_logits.shape[1], 1, 1)
+
+        # Perform x_T*S_t(T) - 10^4(1-s_t(T))  (Where s_t(T) equal to 1 if T <= t which is already calculated in mask)
+        softm_n = attn_logits * mask
+        softm_n = softm_n - (pow(10, 4) * (1 - mask))
+        softm_n = torch.exp(softm_n)
+
+        softm_d = softm_d.unsqueeze(3).repeat(1, 1, 1, attn_logits.shape[3])
+        output = torch.div(softm_n, softm_d)
+
+        return output
         pass
+        # ==========================
 
     def apply_attention(self, queries, keys, values):
         """Apply the attention.
@@ -209,6 +238,8 @@ class MultiHeadedAttention(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        output = torch.reshape(tensor, [tensor.shape[0], self.num_heads, tensor.shape[1], -1])
+        return output
         pass
 
     def merge_heads(self, tensor):
@@ -237,6 +268,10 @@ class MultiHeadedAttention(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+
+        output = torch.reshape(tensor, [tensor.shape[0], tensor.shape[2], self.num_heads * tensor.shape[3]])
+        return output
+
         pass
 
     def forward(self, hidden_states):

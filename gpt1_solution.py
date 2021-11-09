@@ -65,6 +65,20 @@ class MultiHeadedAttention(nn.Module):
         self.num_heads = num_heads
         self.sequence_length = sequence_length
 
+
+        self.feature_input = self.head_size * self.num_heads
+        self.feature_output = self.head_size * self.num_heads
+
+        self.LinearQ = nn.Linear(self.feature_input, self.feature_output)
+        self.LinearK = nn.Linear(self.feature_input, self.feature_output)
+        self.LinearV = nn.Linear(self.feature_input, self.feature_output)
+        self.LinearY = nn.Linear(self.feature_input, self.feature_output)
+
+        #self.LinQ = nn.Linear(head_size * num_heads, head_size * num_heads)
+        #self.LinK = nn.Linear(head_size * num_heads, head_size * num_heads)
+        #self.LinV = nn.Linear(head_size * num_heads, head_size * num_heads)
+        #self.LinY = nn.Linear(head_size * num_heads, head_size * num_heads)
+
         # ==========================
         # TODO: Write your code here
         # ==========================
@@ -307,7 +321,21 @@ class MultiHeadedAttention(nn.Module):
         # TODO: Write your code here
         # ==========================
 
+        #nn.Linear(hidden_size, embedding_size)
+        # Reshape hidden states
+        #hidden_states = self.split_heads(hidden_states)
+        Q = self.LinearQ(hidden_states)
+        K = self.LinearK(hidden_states)
+        V = self.LinearV(hidden_states)
 
+        Q = self.split_heads(Q)
+        K = self.split_heads(K)
+        V = self.split_heads(V)
+        output = self.apply_attention(Q, K, V)
+        output = self.LinearY(output)
+        #output = F.softmax(output, dim=2)
+
+        return output
         pass
 
 

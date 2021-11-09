@@ -241,7 +241,8 @@ class MultiHeadedAttention(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-        output = torch.reshape(tensor, [tensor.shape[0], self.num_heads, tensor.shape[1], -1])
+        output = torch.reshape(tensor, [tensor.shape[0], tensor.shape[1], self.num_heads, -1])
+        output = torch.transpose(output, dim0=1, dim1=2)
         return output
         pass
 
@@ -271,8 +272,8 @@ class MultiHeadedAttention(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-
-        output = torch.reshape(tensor, [tensor.shape[0], tensor.shape[2], self.num_heads * tensor.shape[3]])
+        output = torch.transpose(tensor, dim0=1, dim1=2)
+        output = torch.reshape(output, [output.shape[0], output.shape[1], output.shape[2] * output.shape[3]])
         return output
 
         pass

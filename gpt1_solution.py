@@ -128,6 +128,9 @@ class MultiHeadedAttention(nn.Module):
         # TODO: Write your code here
         # ==========================
         # Transpose key matrix
+        print(queries.shape)
+        print(keys.shape)
+
         d = queries.size()[-1]
         keys_t = torch.transpose(keys, dim0=2, dim1=3)
         attn_logits = torch.matmul(queries, keys_t)

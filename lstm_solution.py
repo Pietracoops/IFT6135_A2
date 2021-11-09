@@ -78,7 +78,7 @@ class LSTM(nn.Module):
         embeds = self.embedding(inputs)
         lstm_out, hidden_states = self.lstm(embeds, hidden_states)
         tag_space = self.classifier(lstm_out)
-        log_probas = F.log_softmax(tag_space, dim=1)
+        log_probas = F.log_softmax(tag_space, dim=2)
 
         return log_probas, hidden_states
         # ==========================

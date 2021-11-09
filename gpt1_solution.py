@@ -139,7 +139,10 @@ class MultiHeadedAttention(nn.Module):
 
         # Perform softmax with mask
         softm_d = torch.exp(attn_logits)
+        print(softm_d[0][0][0])
+        print(torch.sum(softm_d[0][0][0]))
         softm_d = torch.sum(softm_d, dim=3) # Denom of softmax
+        print(softm_d[0][0][0])
 
         # Create mask
         mask = torch.zeros([attn_logits.shape[2], attn_logits.shape[3]])
@@ -212,6 +215,12 @@ class MultiHeadedAttention(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+
+        weights = self.get_attention_weights(queries, keys)
+        attended_values = weights * values
+        outputs = self.merge_heads(attended_values)
+
+        return outputs
         pass
 
     def split_heads(self, tensor):
@@ -313,6 +322,8 @@ class MultiHeadedAttention(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+
+
         pass
 
 

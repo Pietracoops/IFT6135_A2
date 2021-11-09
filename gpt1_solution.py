@@ -118,18 +118,13 @@ class MultiHeadedAttention(nn.Module):
         print(queries.shape)
         print(keys.shape)
 
+        # weights = softmax(Q * K^{T} / sqrt(head_size))
         d = queries.size()[-1]
         keys_t = torch.transpose(keys, dim0=2, dim1=3)
         attn_logits = torch.matmul(queries, keys_t)
-
         attn_logits = attn_logits / math.sqrt(d)
 
         # Perform softmax with mask
-        softm_d = torch.exp(attn_logits)
-        print(softm_d[0][0][0])
-        print(torch.sum(softm_d[0][0][0]))
-        softm_d = torch.sum(softm_d, dim=3) # Denom of softmax
-        print(softm_d[0][0][0])
 
         # Create mask
         mask = torch.zeros([attn_logits.shape[2], attn_logits.shape[3]])
@@ -139,13 +134,21 @@ class MultiHeadedAttention(nn.Module):
                     mask[i][j] = 1
         mask = mask.unsqueeze(0).repeat(attn_logits.shape[0], attn_logits.shape[1], 1, 1)
 
+
+        softm_d = torch.exp(attn_logits)
+        softm_d = softm_d * mask
+        softm_d = torch.sum(softm_d, dim=3)
+        print(softm_d[0][0][0])
+
+
+
         # Perform x_T*S_t(T) - 10^4(1-s_t(T))  (Where s_t(T) equal to 1 if T <= t which is already calculated in mask)
-        softm_n = attn_logits * mask
-        softm_n = softm_n - (pow(10, 4) * (1 - mask))
+        attn_logits_masked = attn_logits * mask
+        softm_n = attn_logits_masked - (pow(10, 4) * (1 - mask))
         softm_n = torch.exp(softm_n)
 
         softm_d = softm_d.unsqueeze(3).repeat(1, 1, 1, attn_logits.shape[3])
-        output = torch.div(softm_n, softm_d)
+        output = softm_n / softm_d
 
         return output
         pass

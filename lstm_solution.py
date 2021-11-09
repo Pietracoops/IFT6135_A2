@@ -115,19 +115,15 @@ class LSTM(nn.Module):
         # ==========================
         # Edit: As hinted at by Leo, the question can be solved without loops by using the reduction and ignore_index parameters of torch.nn.functional.nll_loss().
 
-        #mask = mask.unsqueeze(2).repeat(1, 1, log_probas.shape[2])
-        #log_probas_output = log_probas * mask
-        log_probas_output = torch.reshape(log_probas, [log_probas.shape[0], log_probas.shape[2], log_probas.shape[1]])
-        log_probas_output = torch.nn.functional.nll_loss(log_probas_output, targets, ignore_index=0, reduction='mean')
+        vocab_size = log_probas.size(-1)
+        log_probas_r = log_probas.view(-1, vocab_size)
+        targets_r = targets.view(-1)
+        t = torch.sum(mask.view(-1))
+        mask_r = mask.view(-1).bool()
+        loss = F.nll_loss(log_probas_r[mask_r], targets_r[mask_r], reduction='sum')
+        loss = loss / t
 
-        #log_probas_output = log_probas[0].gather(1, targets)        # Grab the log probability at the given target token
-        #log_probas_output = log_probas_output * mask                # Multiply the tensor by the mask to 0 out non-used entries
-        #log_probas_output = torch.sum(log_probas_output, dim=0)     # Sum up the log probabilities for a set of 256
-        #T_values = torch.count_nonzero(mask, dim=0)                 # Determine the value of T by counting non-zeros
-        #log_probas_output = log_probas_output / T_values            # Divide by T
-        #log_probas_output = torch.mean(log_probas_output, dim=0)    # Find mean of log probability across batch size
-#
-        return log_probas_output
+        return loss
         pass
         # ==========================
 

@@ -115,8 +115,6 @@ class MultiHeadedAttention(nn.Module):
         # TODO: Write your code here
         # ==========================
         # Transpose key matrix
-        print(queries.shape)
-        print(keys.shape)
 
         # weights = softmax(Q * K^{T} / sqrt(head_size))
         d = queries.size()[-1]
@@ -134,15 +132,11 @@ class MultiHeadedAttention(nn.Module):
                     mask[i][j] = 1
         mask = mask.unsqueeze(0).repeat(attn_logits.shape[0], attn_logits.shape[1], 1, 1)
 
-
         softm_d = torch.exp(attn_logits)
         softm_d = softm_d * mask
         softm_d = torch.sum(softm_d, dim=3)
-        print(softm_d[0][0][0])
 
 
-
-        # Perform x_T*S_t(T) - 10^4(1-s_t(T))  (Where s_t(T) equal to 1 if T <= t which is already calculated in mask)
         attn_logits_masked = attn_logits * mask
         softm_n = attn_logits_masked - (pow(10, 4) * (1 - mask))
         softm_n = torch.exp(softm_n)

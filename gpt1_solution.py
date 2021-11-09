@@ -438,6 +438,12 @@ class MiniGPT1(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        #embeddings = self.embedding
+        positions = torch.arange(0, inputs.shape[1])
+        positions = positions.unsqueeze(0).repeat(inputs.shape[0], 1)
+        embeddings = self.embedding(inputs, positions)
+
+        return embeddings
         pass
 
     def forward(self, inputs):
@@ -465,6 +471,15 @@ class MiniGPT1(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        embeds = self.get_embeddings(inputs)
+        output = self.layers(embeds)
+        output = self.classifier(output)
+
+        #potentially softmax this bad
+        log_probas = F.log_softmax(output)
+
+        return log_probas
+
         pass
 
     def loss(self, log_probas, targets, mask):

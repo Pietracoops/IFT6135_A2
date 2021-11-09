@@ -113,17 +113,21 @@ class LSTM(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-        # Edit: As hinted at by Leo, the question can be solved without loops by using the reduction and ignore_index parameters of torch.nn.functional.nll_loss().
 
         vocab_size = log_probas.size(-1)
-        log_probas_r = log_probas.view(-1, vocab_size)
-        targets_r = targets.view(-1)
-        t = torch.sum(mask.view(-1))
-        mask_r = mask.view(-1).bool()
-        loss = F.nll_loss(log_probas_r[mask_r], targets_r[mask_r], reduction='sum')
-        loss = loss / t
+        mask_re = mask.unsqueeze(2).repeat(1, 1, log_probas.shape[2])
+        log_probas_re = log_probas * mask_re
+        log_probas_re = log_probas_re.view(-1, vocab_size)
+        targets_re = targets.view(-1)
+        loss_re = F.nll_loss(log_probas_re, targets_re, ignore_index=0, reduction='none')
+        loss_re = torch.reshape(loss_re, [targets.shape[0], targets.shape[1]])
 
-        return loss
+        mask_sums = torch.sum(mask, dim=1)
+        loss_re = torch.sum(loss_re, dim=1)
+        loss_re = loss_re / mask_sums
+        loss_re = torch.mean(loss_re, dim=0)
+
+        return loss_re
         pass
         # ==========================
 

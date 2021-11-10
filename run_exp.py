@@ -64,6 +64,8 @@ def train(epoch, model, dataloader, optimizer, args):
         else:
             log_probas = model(batch["source"])
 
+        device = torch.device('cuda:0')
+        log_probas = log_probas.to(device)
         loss = model.loss(log_probas, batch["target"], batch["mask"])
         losses.append(loss.item() * batch["mask"].sum().item())
 

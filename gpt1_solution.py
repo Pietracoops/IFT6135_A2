@@ -139,7 +139,7 @@ class MultiHeadedAttention(nn.Module):
         # Perform softmax with mask
 
         # Create mask
-        mask = torch.zeros([attn_logits.shape[2], attn_logits.shape[3]])
+        mask = torch.zeros([attn_logits.shape[2], attn_logits.shape[3]]).cuda()
         for i in range(0, mask.shape[0]):
             for j in range(0, mask.shape[1]):
                 if (j <= i):
@@ -439,7 +439,7 @@ class MiniGPT1(nn.Module):
         # TODO: Write your code here
         # ==========================
         #embeddings = self.embedding
-        positions = torch.arange(0, inputs.shape[1])
+        positions = torch.arange(0, inputs.shape[1], device=inputs.device)
         positions = positions.unsqueeze(0).repeat(inputs.shape[0], 1)
         embeddings = self.embedding(inputs, positions)
 
@@ -512,6 +512,7 @@ class MiniGPT1(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        device = torch.device('cuda:0')
         vocab_size = log_probas.size(-1)
         mask_re = mask.unsqueeze(2).repeat(1, 1, log_probas.shape[2])
         log_probas_re = log_probas * mask_re

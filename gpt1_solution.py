@@ -471,12 +471,13 @@ class MiniGPT1(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-        embeds = self.get_embeddings(inputs)
-        output = self.layers(embeds)
-        output = self.classifier(output)
+        output = self.get_embeddings(inputs)
 
-        #potentially softmax this bad
-        log_probas = F.log_softmax(output)
+        for i, layer_module in enumerate(self.layers):
+            output = layer_module(output)
+
+        output = self.classifier(output)
+        log_probas = F.log_softmax(output, dim=2)
 
         return log_probas
 
@@ -511,6 +512,20 @@ class MiniGPT1(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
+        vocab_size = log_probas.size(-1)
+        mask_re = mask.unsqueeze(2).repeat(1, 1, log_probas.shape[2])
+        log_probas_re = log_probas * mask_re
+        log_probas_re = log_probas_re.view(-1, vocab_size)
+        targets_re = targets.view(-1)
+        loss_re = F.nll_loss(log_probas_re, targets_re, ignore_index=0, reduction='none')
+        loss_re = torch.reshape(loss_re, [targets.shape[0], targets.shape[1]])
+
+        mask_sums = torch.sum(mask, dim=1)
+        loss_re = torch.sum(loss_re, dim=1)
+        loss_re = loss_re / mask_sums
+        loss_re = torch.mean(loss_re, dim=0)
+
+        return loss_re
         pass
 
     @classmethod

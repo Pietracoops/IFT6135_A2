@@ -1,0 +1,659 @@
+\documentclass[12pt]{article}
+\usepackage[canadien]{babel} 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{subfigure}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{url}
+\usepackage{todonotes}
+\usepackage{tikz}
+
+% If your paper is accepted, change the options for the package
+% aistats2e as follows:
+%
+%\usepackage[accepted]{aistats2e}
+%
+% This option will print headings for the title of your paper and
+% headings for the authors names, plus a copyright note at the end of
+% the first column of the first page.
+\setlength{\parindent}{0cm}
+\addtolength{\oddsidemargin}{-2cm}
+\addtolength{\evensidemargin}{-2cm}
+\setlength{\textwidth}{17.78cm}
+\addtolength{\topmargin}{-2.25cm}
+\setlength{\textheight}{23.24cm}
+\addtolength{\parskip}{5mm}
+\pagestyle{fancy}
+
+%************
+%* COMMANDS *
+%************
+
+\input{math_commands.tex}
+
+\usepackage{booktabs}
+\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{exercise}{Question}%[chapter]
+\newtheorem{answer}{Answer} % asterisk to remove ordering
+
+\newcommand{\Exercise}[1]{
+#1
+}
+
+\newcommand{\Answer}[1]{
+\begin{answer}#1\end{answer}
+}
+
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand{\expected}[1]{\mathbb{E}\left[ #1 \right]}
+\newcommand{\derive}[2]{\frac{d#1}{d#2}}
+\newcommand{\pd}[2]{\frac{\partial#1}{\partial#2}}
+\newcommand{\jacobian}{\mathbb{J}}
+\newcommand{\norm}[1]{\|#1\|}
+
+\usepackage{enumitem}
+\newcommand{\staritem}{
+\addtocounter{enumi}{1}
+\item[$\phantom{x}^{*}$\theenumi]}
+\setlist[enumerate,1]{leftmargin=*, label=\arabic*.}
+
+\begin{document}
+
+\fancyhead{}
+\fancyfoot{}
+
+\fancyhead[L]{
+  \begin{tabular}[b]{l}
+    IFT6135-A2021  \\
+    Prof: Aishwarya Agrawal \\
+  \end{tabular}
+}
+\fancyhead[R]{
+  \begin{tabular}[b]{r}
+    Assignment 2, Theoretical Part   \\
+    RNN, Optimization, Regularization and Normalization \\
+  \end{tabular}
+}
+\fancyfoot[C]{- Do not distribute -}
+
+\vspace{1cm}
+
+\shorthandoff{:}
+{\bf Due Date: Monday, 15th November, 11pm ET}
+\\
+
+\vspace{-0.5cm}
+\underline{Instructions}%
+\renewcommand{\labelitemi}{\textbullet}
+\begin{itemize}
+\item \emph{For all questions, show your work!}
+\item \emph{Please use a document preparation system such as LaTeX, unless noted otherwise.}
+\item \emph{Unless noted that questions are related, assume that notation and defintions for each question are self-contained and independent}
+\item \emph{Submit your answers electronically via Gradescope.}
+\item \emph{TAs for this assignment are \textbf{Leo Feng and Milad Aghajohari}.}
+\end{itemize}
+
+\begin{exercise}[4-8-8]
+
+\Exercise{
+\label{ex:bi_rnn_gradient}
+Consider the following Bidirectional RNN:
+\begin{align*}
+\vh^{(f)}_t & = \sigma(\mW^{(f)} \vx_t + \mU^{(f)} \vh^{(f)}_{t-1})\\
+\vh^{(b)}_t & = \sigma(\mW^{(b)} \vx_t + \mU^{(b)} 
+\vh^{(b)}_{t+1})\\
+\vy_t & = \mV^{(f)} \vh^{(f)}_t + \mV^{(b)} \vh^{(b)}_t
+\end{align*}
+where the superscripts $f$ and $b$ correspond to the forward and backward RNNs respectively and $\sigma$ denotes the logistic sigmoid function. 
+Let $\vz_t$ be the true target of the prediction $\vy_t$ and consider the sum of squared loss $L=\sum_t L_t$ where $L_t=||\vz_t - \vy_t||_2^2$.
+
+In this question our goal is to obtain an expression for the gradients $\nabla_{\mW^{(f)}}L$ and $\nabla_{\mU^{(b)}}L$.
+
+\begin{enumerate}
+
+\item First, complete the following computational graph for this RNN, unrolled for 3 time steps (from $t=1$ to $t=3$). 
+Label each node with the corresponding hidden unit and each edge with the corresponding weight.
+Note that it includes the initial hidden states for both the forward and backward RNNs.
+% which are denoted $h_{0}^{(f)}$ and $h_{4}^{(b)}$ respectively. 
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}[el/.style = {inner sep=2pt, align=left, sloped}]
+        \tikzstyle{neuron}=[circle, minimum size = 10mm, thick, draw =black!80, node distance = 24mm]
+        \tikzstyle{connect}=[-latex, thick]
+    
+        \node [neuron, inner sep=0, draw] (hf0) {$h_0^{(f)}$};
+        \node [neuron, inner sep=0, draw, right of=hf0] (hf1) {$h_1^{(f)}$};
+        \node [neuron, inner sep=0, draw, right of=hf1] (hf2) {$h_2^{(f)}$};
+        \node [neuron, inner sep=0, draw, right of=hf2] (hf3) {$h_3^{(f)}$};
+    
+        \node [neuron, inner sep=0, draw, above of=hf1] (hb1) {$h_1^{(b)}$};
+        \node [neuron, inner sep=0, draw, right of=hb1] (hb2) {$h_2^{(b)}$};
+        \node [neuron, inner sep=0, draw, right of=hb2] (hb3) {$h_3^{(b)}$};
+        \node [neuron, inner sep=0, draw, right of=hb3] (hb4) {$h_4^{(b)}$};
+    
+        \node [neuron, inner sep=0, draw, above of=hb1] (y1) {$\vy_1$};
+        \node [neuron, inner sep=0, draw, above of=hb2] (y2) {$\vy_2$};
+        \node [neuron, inner sep=0, draw, above of=hb3] (y3) {$\vy_3$};
+    
+        \node [neuron, inner sep=0, draw, below of=hf1] (x1) {$\vx_1$};
+        \node [neuron, inner sep=0, draw, below of=hf2] (x2) {$\vx_2$};
+        \node [neuron, inner sep=0, draw, below of=hf3] (x3) {$\vx_3$};
+    
+        \path 
+          (hf0) edge [connect] node[el,above,xshift=-0.1cm] {$U^{(f)}$} (hf1)
+          (hf1) edge [connect] node[el,above,xshift=-0.1cm] {$U^{(f)}$} (hf2)
+          (hf2) edge [connect] node[el,above,xshift=-0.1cm] {$U^{(f)}$} (hf3)
+          (hb4) edge [connect] node[el,above,xshift=0.2cm] {$U^{(b)}$} (hb3)
+          (hb3) edge [connect] node[el,above,xshift=0.2cm] {$U^{(b)}$} (hb2)
+          (hb2) edge [connect] node[el,above,xshift=0.2cm] {$U^{(b)}$} (hb1)
+          (x1)  edge [connect, bend left=30]  node[el,rotate=-90,above,yshift=-1.9cm,xshift=-0.1cm] {$W^{(b)}$} (hb1)
+          (x2)  edge [connect, bend left=30]  node[el,rotate=-90,above,yshift=-1.9cm,xshift=-0.1cm] {$W^{(b)}$} (hb2)
+          (x3)  edge [connect, bend left=30]  node[el,rotate=-90,above,yshift=-1.9cm,xshift=-0.1cm] {$W^{(b)}$} (hb3)
+          (hf1)  edge [connect, bend right=30]  node[el,rotate=-90,above,yshift=1.5cm] {$V^{(f)}$} (y1)
+          (hf2)  edge [connect, bend right=30]  node[el,rotate=-90,above,yshift=1.5cm] {$V^{(f)}$} (y2)
+          (hf3)  edge [connect, bend right=30]  node[el,rotate=-90,above,yshift=1.5cm] {$V^{(f)}$} (y3)
+          (x1)  edge [connect]  node[el,rotate=-90,right] {$W^{(f)}$} (hf1)
+          (x2)  edge [connect]  node[el,rotate=-90,right] {$W^{(f)}$} (hf2)
+          (x3)  edge [connect]  node[el,rotate=-90,right] {$W^{(f)}$} (hf3)
+          (hb1)  edge [connect]  node[el,rotate=-90,left] {$V^{(b)}$} (y1)
+          (hb2)  edge [connect]  node[el,rotate=-90,left] {$V^{(b)}$} (y2)
+          (hb3)  edge [connect]  node[el,rotate=-90,left] {$V^{(b)}$} (y3);
+    \end{tikzpicture}
+    \caption{Computational graph of the bidirectional RNN unrolled for three timesteps.}
+    \label{fig:birnn}
+\end{figure}
+
+\item 
+Using total derivatives we can express the gradients $\nabla_{\vh_{t}^{(f)}}L$ and $\nabla_{\vh_{t}^{(b)}}L$ recursively
+in terms of $\nabla_{\vh_{t+1}^{(f)}}L$ and $\nabla_{\vh_{t-1}^{(b)}}L$ as follows:
+$$\nabla_{\vh_{t}^{(f)}}L = \nabla_{\vh_t^{(f)}}L_t + \left(\frac{\partial \vh_{t+1}^{(f)}}{\partial \vh_{t}^{(f)}}\right)^\top\nabla_{\vh_{t+1}^{(f)}}L $$
+$$\nabla_{\vh_{t}^{(b)}}L = \nabla_{\vh_t^{(b)}}L_t + \left(\frac{\partial \vh_{t-1}^{(b)}}{\partial \vh_{t}^{(b)}}\right)^\top\nabla_{\vh_{t-1}^{(b)}}L $$
+
+Derive an expression for $\nabla_{\vh_{t}^{(f)}}L_t$, $\nabla_{\vh_{t}^{(b)}}L_t$, $\frac{\partial \vh_{t+1}^{(f)}}{\partial \vh_{t}^{(f)}}$ and $\frac{\partial \vh_{t-1}^{(b)}}{\partial \vh_{t}^{(b)}}$.
+
+
+\item
+Now derive $\nabla_{\mW^{(f)}}L$ and $\nabla_{\mU^{(b)}}L$ as functions of $\nabla_{\vh_{t}^{(f)}}L$ and $\nabla_{\vh_{t}^{(b)}}L$, respectively.\\
+\emph{Hint: It might be useful to consider the contribution of the weight matrices when computing the recurrent hidden unit at a particular time $t$ and how those contributions might be aggregated.}
+
+\end{enumerate}
+}
+
+\newcommand{\expr}[3]{#1_{#2}^{(#3)}}
+
+\Answer{
+\begin{enumerate}
+    \setcounter{enumi}{1}
+    \item {
+    \begin{alignat*}{3}
+    \nabla_{h_t^{(f)}}L_t &= \pd{}{h_t^{(f)}} L_t
+    \\
+    &= \pd{}{h_t^{(f)}} \norm{z_t - y_t}_2^2
+    \\
+    &= \pd{}{h_t^{(f)}} \norm{z_t - V^{(f)}\expr{h}{t}{f} - V^{(b)}\expr{h}{t}{b}}_2^2 \tab y_t = V^{(f)}\expr{h}{t}{f} - V^{(b)}\expr{h}{t}{b}
+    \\
+    &= \frac{\expr{V}{}{f}\expr{h}{t}{f} + \expr{V}{}{b}\expr{h}{t}{b} - z_t}{\norm{z_t - V^{(f)}\expr{h}{t}{f} - V^{(b)}\expr{h}{t}{b}}_2} \tab \text{(from Homework 0)}
+    \\
+    &= \frac{y_t - z_t}{\norm{z_t - y_t}_2}
+    \end{alignat*}
+    
+    \begin{alignat*}{3}
+    \nabla_{h_t^{(b)}}L_t &= \pd{}{h_t^{(b)}} L_t
+    \\
+    &= \pd{}{h_t^{(b)}} \norm{z_t - y_t}_2^2
+    \\
+    &= \pd{}{h_t^{(b)}} \norm{z_t - V^{(f)}\expr{h}{t}{f} - V^{(b)}\expr{h}{t}{b}}_2^2 \tab y_t = V^{(f)}\expr{h}{t}{f} - V^{(b)}\expr{h}{t}{b}
+    \\
+    &= \frac{\expr{V}{}{f}\expr{h}{t}{f} + \expr{V}{}{b}\expr{h}{t}{b} - z_t}{\norm{z_t - V^{(f)}\expr{h}{t}{f} - V^{(b)}\expr{h}{t}{b}}_2} \tab \text{(from Homework 0)}
+    \\
+    &= \frac{y_t - z_t}{\norm{z_t - y_t}_2}
+    \end{alignat*}
+    
+    \newcommand{\linearf}{\expr{w}{}{f}x_{t+1} + \expr{U}{}{f}\expr{h}{t}{f}}
+    
+    \begin{alignat*}{3}
+    \pd{\expr{h}{t+1}{f}}{\expr{h}{t}{f}} &= \pd{}{\expr{h}{t}{f}} \expr{h}{t+1}{f}
+    \\
+    &= \pd{}{\expr{h}{t}{f}} \sigma(\expr{w}{}{f}x_{t+1} + \expr{U}{}{f}\expr{h}{t}{f}) \tab (\expr{h}{t+1}{f} = \linearf)
+    \\
+    &= \pd{}{\expr{h}{t}{f}} \frac{1}{1 + e^{-(\linearf)}}
+    \\
+    &= (-1)(1 + e^{-(\linearf)})^{-2} \times -\expr{U}{}{f}e^{-(\linearf)}
+    \\
+    &= \frac{\expr{U}{}{f}e^{-(\linearf)}}{(1 + e^{-(\linearf)})^2}
+    \\
+    &= \expr{U}{}{f} \times \frac{1}{1 + e^{-(\linearf)}} \times \frac{e^{-(\linearf)}}{1 + e^{-(\linearf)}}
+    \\
+    &= \expr{U}{}{f} \times \sigma(\linearf) \times (1 - \sigma(\linearf))
+    \\
+    &= \expr{U}{}{f}\expr{h}{t+1}{f}(1-\expr{h}{t+1}{f})
+    \end{alignat*}
+    
+    \newcommand{\linearb}{\expr{w}{}{b}x_{t-1} + \expr{U}{}{b}\expr{h}{t}{b}}
+    
+    \begin{alignat*}{3}
+    \pd{\expr{h}{t-1}{b}}{\expr{h}{t}{b}} &= \pd{}{\expr{h}{t}{b}} \expr{h}{t-1}{b}
+    \\
+    &= \pd{}{\expr{h}{t}{b}} \sigma(\expr{w}{}{b}x_{t-1} + \expr{U}{}{f}\expr{h}{t}{b}) \tab (\expr{h}{t-1}{b} = \linearb)
+    \\
+    &= \pd{}{\expr{h}{t}{b}} \frac{1}{1 + e^{-(\linearb)}}
+    \\
+    &= (-1)(1 + e^{-(\linearb)})^{-2} \times -\expr{U}{}{f}e^{-(\linearb)}
+    \\
+    &= \frac{\expr{U}{}{b}e^{-(\linearb)}}{(1 + e^{-(\linearb)})^2}
+    \\
+    &= \expr{U}{}{b} \times \frac{1}{1 + e^{-(\linearb)}} \times \frac{e^{-(\linearb)}}{1 + e^{-(\linearb)}}
+    \\
+    &= \expr{U}{}{b} \times \sigma(\linearb) \times (1 - \sigma(\linearb))
+    \\
+    &= \expr{U}{}{b}\expr{h}{t-1}{f}(1-\expr{h}{t-1}{b})
+    \end{alignat*}
+    }
+    
+    \item {
+    \newcommand{\linearf}{\expr{w}{}{f}x_{t} + \expr{U}{}{f}\expr{h}{t-1}{f}}
+    
+    \begin{alignat*}{3}
+    \nabla_{\expr{w}{}{f}}L &= \sum_{t=1}^T \pd{L_t}{\expr{h}{t}{f}}\pd{\expr{h}{t}{f}}{\expr{w}{}{f}}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \pd{\expr{h}{t}{f}}{\expr{w}{}{f}}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t\pd{}{\expr{w}{}{f}}\expr{h}{t}{f}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t\pd{}{\expr{w}{}{f}}\sigma(\linearf) 
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t\pd{}{\expr{w}{}{f}}\frac{1}{1+e^{-(\linearf)}}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \left ( \frac{-1}{(1+e^{-(\linearf)})^2} \times -x_t e^{-(\linearf)} \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \left ( \frac{x_t e^{-(\linearf)}}{(1+e^{-(\linearf)})^2} \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \left ( x_t \times \frac{1}{1+e^{-(\linearf)}} \times \frac{e^{-(\linearf)}}{1+e^{-(\linearf)}} \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \left ( x_t \times \sigma(\linearf) \times (1-\sigma(\linearf)) \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \left ( x_t \times \expr{h}{t}{f} \times (1-\expr{h}{t}{f}) \right )
+    \end{alignat*}
+    
+    \newcommand{\linearb}{\expr{w}{}{b}x_{t} + \expr{U}{}{b}\expr{h}{t+1}{b}}
+    
+    \begin{alignat*}{3}
+    \nabla_{\expr{w}{}{b}}L &= \sum_{t=1}^T \pd{L_t}{\expr{h}{t}{b}}\pd{\expr{h}{t}{b}}{\expr{w}{}{b}}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(b)}}L_t \pd{\expr{h}{t}{b}}{\expr{w}{}{b}}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(b)}}L_t\pd{}{\expr{w}{}{b}}\expr{h}{t}{b}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(b)}}L_t\pd{}{\expr{w}{}{b}}\sigma(\linearb) 
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(b)}}L_t\pd{}{\expr{w}{}{b}}\frac{1}{1+e^{-(\linearb)}}
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(b)}}L_t \left ( \frac{-1}{(1+e^{-(\linearb)})^2} \times -\expr{h}{t-1}{b} e^{-(\linearb)} \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \left ( \frac{\expr{h}{t-1}{b} e^{-(\linearb)}}{(1+e^{-(\linearb)})^2} \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(f)}}L_t \left ( \expr{h}{t-1}{b} \times \frac{1}{1+e^{-(\linearb)}} \times \frac{e^{-(\linearb)}}{1+e^{-(\linearb)}} \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(b)}}L_t \left ( \expr{h}{t-1}{b} \times \sigma(\linearb) \times (1-\sigma(\linearb)) \right )
+    \\
+    &= \sum_{t=1}^T \nabla_{h_t^{(b)}}L_t \left ( \expr{h}{t-1}{b} \times \expr{h}{t}{b} \times (1-\expr{h}{t}{b}) \right )
+    \end{alignat*}
+    }
+\end{enumerate}
+}
+
+\end{exercise}
+
+
+\begin{exercise}[1-12-2-6]
+
+
+\def\vdelta{{\bm{\delta}}}
+\usetikzlibrary{positioning}
+
+\Exercise{
+\label{ex:decoding}
+Suppose that we have a vocabulary containing $N$ possible words, including a special token \texttt{<BOS>} to indicate the beginning of a sentence. Recall that in general, a language model with a full context can be written as
+\begin{equation*}
+    p(w_{1}, w_{2}, \ldots, w_{T} \mid w_{0}) = \prod_{t=1}^{T} p(w_{t} \mid w_{0}, \ldots, w_{t-1}).
+\end{equation*}
+We will use the notation $\vw_{0:t-1}$ to denote the (partial) sequence $(w_{0}, \ldots, w_{t-1})$. Once we have a fully trained language model, we would like to generate realistic sequences of words from our language model, starting with our special token \texttt{<BOS>}. In particular, we might be interested in generating the most likely sequence $\vw_{1:T}^{\star}$ under this model, defined as
+\begin{equation*}
+    \vw_{1:T}^{\star} = \argmax_{\vw_{1:T}} p(\vw_{1:T} \mid w_{0} = \textrm{\texttt{<BOS>}}).
+\end{equation*}
+For clarity we will drop the explicit conditioning on $w_{0}$, assuming from now on that the sequences always start with the \texttt{<BOS>} token.
+
+\begin{enumerate}[label=\arabic{exercise}.\arabic*]
+    \item How many possible sequences of length $T+1$ starting with the token \texttt{<BOS>} can be generated in total? Give an exact expression, without the $O$ notation. Note that the length $T+1$ here includes the \texttt{<BOS>} token.
+    
+    \item In this question only, we will assume that our language model satisfies the \emph{Markov property}
+    \begin{equation*}
+        \forall\, t>0,\ p(w_{t}\mid w_{0}, \ldots, w_{t-1}) = p(w_{t}\mid w_{t-1}).
+    \end{equation*}
+    Moreover, we will assume that the model is time-homogeneous, meaning that there exists a matrix $\mP \in \sR^{N\times N}$ such that $\forall\,t > 0,\ p(w_{t} = j \mid w_{t-1} = i) = [\mP]_{i, j} = P_{ij}$.
+    \begin{enumerate}[label=\arabic{exercise}.\arabic{enumi}.\alph*]
+        \item Let $\vdelta_{t} \in \sR^{N}$ be the vector of size $N$ defined for $t > 0$ as
+        \begin{equation*}
+            \delta_{t}(j) = \max_{\vw_{1:t-1}}p(\vw_{1:t-1}, w_{t} = j),
+        \end{equation*}
+        where $\vw_{1:0} = \emptyset$. Using the following convention for $\vdelta_{0}$
+        \begin{equation*}
+            \delta_{0}(j) = \left\{\begin{array}{ll}
+                1 & \textrm{if $j = \textrm{\texttt{<BOS>}}$}\\
+                0 & \textrm{otherwise,}
+            \end{array}\right.
+        \end{equation*}
+        give the recurrence relation satisfied by $\vdelta_{t}$ (for $t > 0$).
+        
+        \item Show that $w_{T}^{\star} = \argmax_{j} \delta_{T}(j)$.
+        
+        \item Let $\va_{t} \in \{1, \ldots, N\}^{N}$ be the vector of size $N$ defined for $t > 0$ as
+        \begin{equation*}
+            a_{t}(j) = \argmax_{i}P_{ij}\delta_{t-1}(i).
+        \end{equation*}
+        Show that $\forall\, 0 < t < T$, $w_{t}^{\star} = a_{t+1}(w_{t+1}^{\star})$.
+        
+        \item Using the previous questions, write the pseudo-code of an algorithm to compute the sequence $\vw_{1:T}^{\star}$ using dynamic programming. This is called \emph{Viterbi decoding}.
+        
+        \item What is the time complexity of this algorithm? Its space complexity? Write the algorithmic complexities using the $O$ notation. Comment on the efficiency of this algorithm compared to naively searching for $\vw_{1:T}^{\star}$ by enumerating all possible sequences (based on your answer to question 1).
+        
+        \item When the size of the vocabulary $N$ is not too large, can you use this algorithm to generate the most likely sequence of a language model defined by a recurrent neural network, such as a GRU or an LSTM? Why? Why not? If not, name a language model you can apply this algorithm to.
+    \end{enumerate}
+    
+    \item For real-world applications, the size of the vocabulary $N$ can be very large (e.g. $N = 30\textrm{k}$ for BERT, $N = 50\textrm{k}$ for GPT-2), making even dynamic programming impractical. In order to generate $B$ sequences having high likelihood, one can use a heuristic algorithm called \emph{Beam search decoding}, whose pseudo-code is given in Algorithm~\ref{alg:beam-search-decoding} below
+
+    \begin{minipage}{\linewidth}
+    \begin{algorithm}[H]
+    \DontPrintSemicolon
+    \KwIn{A language model $p(\vw_{1:T} \mid w_{0})$, the beam width $B$}
+    \KwOut{$B$ sequences $\vw_{1:T}^{(b)}$ for $b \in \{1, \ldots, B\}$}
+    Initialization: $w_{0}^{(b)} \leftarrow \textrm{\texttt{<BOS>}}$ for all $b \in \{1,\ldots,B\}$\;
+    Initial log-likelihoods: $l_{0}^{(b)} \leftarrow 0$ for all $b \in \{1,\ldots,B\}$\;
+    \For{$t = 1$ \KwTo $T$}{
+      \For{$b = 1$ \KwTo $B$}{
+        \For{$j = 1$ \KwTo $N$}{
+          $s_{b}(j) \leftarrow l_{t-1}^{(b)} + \log p(w_{t} = j \mid \vw_{0:t-1}^{(b)})$\;
+        }
+      }
+      \For{$b = 1$ \KwTo $B$}{
+        Find $(b', j)$ such that $s_{b'}(j)$ is the $b$-th largest score\;
+        Save the partial sequence $b'$: $\widetilde{\vw}_{0:t-1}^{(b)} \leftarrow \vw_{0:t-1}^{(b')}$\;
+        Add the word $j$ to the sequence $b$: $w_{t}^{(b)} \leftarrow j$\;
+        Update the log-likelihood: $l_{t}^{(b)} \leftarrow s_{b'}(j)$\;
+      }
+      Assign the partial sequences: $\vw_{0:t-1}^{(b)} \leftarrow \widetilde{\vw}_{0:t-1}^{(b)}$ for all $b \in \{1, \ldots, B\}$\;
+    }
+    \caption{Beam search decoding}
+    \label{alg:beam-search-decoding}
+    \end{algorithm}
+    \end{minipage}
+    
+    What is the time complexity of Algorithm~\ref{alg:beam-search-decoding}? Its space complexity? Write the algorithmic complexities using the $O$ notation, as a function of $T$, $B$, and $N$. Is this a practical decoding algorithm when the size of the vocabulary is large?
+    
+    \item The different sequences that can be generated with a language model can be represented as a tree, where the nodes correspond to words and edges are labeled with the log-probability $\log p(w_{t}\mid \vw_{0:t-1})$, depending on the path $\vw_{0:t-1}$. In this question, consider the following language model (where the low probability paths have been removed for clarity)
+
+    \hspace*{-2.5em}\begin{minipage}{\linewidth}
+    \centering
+    \begin{tikzpicture}[scale=0.9,every node/.style={shape=rectangle, inner sep=5pt, align=center}, level 3/.style={sibling distance=5.5em}, level 2/.style={sibling distance=11em}, level 1/.style={sibling distance=22em}, edge from parent path={(\tikzparentnode.south) .. controls +(0,-0.7) and +(0,0.7) .. (\tikzchildnode.north)}, edge from parent/.style={draw, thick, -latex}, logl/.style={draw=none, font=\footnotesize}, label/.style={anchor=west, align=flush left}]
+      \node {\texttt{<BOS>}}
+        child { node {\texttt{the}}
+          child { node {\texttt{green\vphantom{l}}}
+            child { node {\texttt{ellipse\vphantom{q}}} edge from parent node[above left,logl] {$-3.6$} }
+            child { node {\texttt{rectangle}} edge from parent node[above right,logl] {$-3.3$} } edge from parent node[above left,logl] {$-3.4$} }
+          child { node {\texttt{red}}
+            child { node {\texttt{circle\vphantom{q}}} edge from parent node[above left,logl] {$-4.8$} }
+            child { node {\texttt{rectangle}} edge from parent node[above right,logl] {$-4.5$} } edge from parent node[above right,logl] {$-3.1$} } edge from parent node[above left,logl] {$-1.5$} }
+        child { node {\texttt{a}}
+          child { node {\texttt{blue}}
+            child { node {\texttt{ellipse\vphantom{q}}} edge from parent node[above left,logl] {$-5.4$} }
+            child { node {\texttt{square\vphantom{l}}} edge from parent node[above right,logl] {$-5.0$} } edge from parent node[above left,logl] {$-2.5$} }
+          child { node {\texttt{red}}
+            child { node {\texttt{circle\vphantom{q}}} edge from parent node[above left,logl] {$-4.9$} }
+            child { node {\texttt{square\vphantom{l}}} edge from parent node[above right,logl] (logl_lvl3) {$-5.1$} } edge from parent node[above right,logl] (logl_lvl2) {$-2.7$} } edge from parent node[above right,logl] (logl_lvl1) {$-1.8$} };
+            
+            \node[label, right=1em of logl_lvl3] (logl_lvl3_label) {$\log p(w_{3}\mid \vw_{0:2})$};
+            \node[label] (logl_lvl2_label) at (logl_lvl2 -| logl_lvl3_label.west) {$\log p(w_{2}\mid \vw_{0:1})$};
+            \node[label] (logl_lvl1_label) at (logl_lvl1 -| logl_lvl3_label.west) {$\log p(w_{1}\mid w_{0})$};
+    \end{tikzpicture}
+    \end{minipage}
+    
+    \begin{enumerate}[label=\arabic{exercise}.\arabic{enumi}.\alph*]
+        \item If you were given the whole tree, including the log-probabilities of all the missing branches (e.g. $\log p(w_{2} = \textrm{\texttt{a}} \mid w_{0} = \textrm{\texttt{<BOS>}}, w_{1} = \textrm{\texttt{red}})$), could you apply Viterbi decoding from question 2 to this language model in order to find the most likely sequence $\vw_{1:3}^{\star}$? Why? Why not? Find $\vw_{1:3}^{\star}$, together with its corresponding log-likelihood $\log p(\vw_{1:3}^{\star}) = \max_{\vw_{1:3}} \log p(\vw_{1:3})$.
+        
+        \item \emph{Greedy decoding} is a simple algorithm where the next word $\overline{w}_{t}$ is selected by maximizing the conditional probability $p(w_{t}\mid \overline{\vw}_{0:t-1})$ (with $\overline{w}_{0} = \textrm{\texttt{<BOS>}}$)
+        \begin{equation*}
+            \overline{w}_{t} = \argmax_{w_{t}} \log p(w_{t}\mid \overline{\vw}_{0:t-1}).
+        \end{equation*}
+        Find $\overline{\vw}_{1:3}$ using greedy decoding on this language model, and its log-likelihood $\log p(\overline{\vw}_{1:3})$.
+        
+        \item Apply beam search decoding (question 3) with a beam width $B = 2$ to this language model, and find $\vw_{1:3}^{(1)}$ and $\vw_{1:3}^{(2)}$, together with their respective log-likelihoods.
+        
+        \item Compare the behaviour of these 3 decoding algorithms on this language model (in particular greedy decoding vs. maximum likelihood, and beam search decoding vs. the other two). How can you mitigate the limitations of beam search?
+    \end{enumerate}
+\end{enumerate}
+}
+
+\Answer{
+\begin{enumerate}
+    \item {
+    The number of possible sequences for $T+1$, starting with the <BOS> token is $N^T$. N is the number of words in our vocabulary and T is the length of a single sequence.
+    \begin{alignat*}{3}
+    \prod_{t=1}^{T} N &= N \times N \times N ... \tab (\text{T times})
+    \\
+    &= N^T
+    \end{alignat*}
+    }
+    
+    \begin{enumerate}
+    \item {
+    \[\delta_t(j) = \max_i P_{ij} \times \delta_{t-1}(i)\]
+    }
+    
+    \item {
+    At $t=0$, the most likely word would be the <BOS> token. $\delta_0$ would  returns 1 given j as the <BOS> token, otherwise 0.
+    \bigbreak
+    The subsequent words following the <BOS> token form the most likely sequence as $\delta_t$ ($\forall t > 0$) maximizes the joint distribution of the $t-1$ sequence given the $t^{th}$ word. The word which maximizes the likeliness of the sequence is then chosen as the $t^{th}$ word (choosing the word which maximizes the joint distribution of the entire sequence).
+    \bigbreak
+    Hence, it return the most lilely $T^{th}$ word.
+    
+    \[w^*_T = \argmax_j \delta_T(j)\]
+    }
+    
+    \item {
+    $a_t(j)$ maximizes the likeliness of the word preceding the $t^{th}$ word denoted by j in the equation. In other words, $a_t$ gives the most likely preceding word to the input word j. As such, if we wished to find the most likely current $t^{th}$ word, passing as input to $a_{t+1}$, the most likely next $(t+1)^{th}$ word would result in us receiving the most likely $t^{th}$.
+    \bigbreak
+    Hence,
+    \[w^*_t = a_{t+1}(w^*_{t+1}\]
+    }
+    \end{enumerate}
+\end{enumerate}
+}
+
+\end{exercise}
+
+
+\begin{exercise}[4-6-6]
+\Exercise{
+\label{ex:weightnorm}
+This question is about normalization techniques.
+\begin{enumerate}[label=\arabic{exercise}.\arabic*]
+\item Batch normalization, layer normalization and instance normalization all involve calculating the mean $\boldsymbol{\mu}$ and variance $\boldsymbol{\sigma^2}$ with respect to different subsets of the tensor dimensions. Given the following 3D tensor, calculate the corresponding mean and variance tensors for each normalization technique: $\boldsymbol{\mu}_{batch}$, $\boldsymbol{\mu}_{layer}$, $\boldsymbol{\mu}_{instance}$, $\boldsymbol{\sigma}^2_{batch}$, $\boldsymbol{\sigma}^2_{layer}$, and $\boldsymbol{\sigma}^2_{instance}$. 
+\\
+$$\begin{bmatrix}\begin{bmatrix}1, 3, 2 \\ 1, 2, 3\end{bmatrix}, \begin{bmatrix}3, 3, 2 \\ 2, 4, 4\end{bmatrix}, \begin{bmatrix}4, 2, 2 \\ 1, 2, 4\end{bmatrix}, \begin{bmatrix}3, 3, 2 \\ 3, 3, 2\end{bmatrix} \end{bmatrix}$$
+% [[[1, 3, 2],
+% [1, 2, 3]],
+% [[3, 3, 2],
+% [2, 4, 4]],
+% [[4, 2, 2],
+% [1, 2, 4]],
+% [[3, 3, 2],
+% [3, 3, 2]]]
+
+The size of this tensor is 4 x 2 x 3 which corresponds to the batch size, number of channels, and  number of features respectively. 
+% \textit{(Hint: Be sure to calculate the variance and not the standard deviation. If you decide to check your work in pytorch, be sure to set \texttt{unbiased=False} when using \texttt{torch.var}.)}
+
+\item For the next two subquestions, we consider the following parameterization of a weight vector $\vw$:
+$$\vw := \gamma\frac{\vu}{||\vu||}$$
+where $\gamma$ is scalar parameter controlling the magnitude and $\vu$ is a vector controlling the direction of $\vw$.
+\\
+
+Consider one layer of a neural network, and omit the bias parameter. 
+To carry out batch normalization, one normally standardizes the preactivation and performs elementwise scale and shift $\hat{y}=\gamma\cdot\frac{y-\mu_y}{\sigma_y}+\beta$ where $y=\vu^\top\vx$. 
+Assume the data $\vx$ (a random vector) is whitened ($\Var(\vx)=\mI$) and centered at $0$  ($\E[\vx]=\mathbf{0}$). 
+Show that $\hat{y}=\vw^\top\vx+\beta$. 
+\item Show that the gradient of a loss function $L(\vu,\gamma,\beta)$ with respect to $\vu$ can be written in the form $\nabla_\vu L=s\mW^\perp\nabla_\vw L$ for some $s$, where $\mW^\perp=\left(\mI-\frac{\vu\vu^\top}{||\vu||^2}\right)$.
+Note that \footnote{As a side note: $\mW^\perp$ is an orthogonal complement that projects the gradient away from the direction of $\vw$, which is usually (empirically) close to a dominant eigenvector of the covariance of the gradient. This helps to condition the landscape of the objective that we want to optimize.} $\mW^\perp\vu=\mathbf{0}$.
+% \item Figure~\ref{fig:weightnormgrowingnorm} shows the norm of $\vu$ as a function of number of updates made to a two-layer MLP using gradient descent. 
+% Different curves correspond to models trained with different log-learning rate. 
+% Explain why (1) the norm is increasing, and (2) why larger learning rate corresponds to faster growth. 
+% (Hint: Use the Pythagorean theorem and the fact that 
+% $\mW^\perp \vu = 0$ from question 4.2).
+
+\end{enumerate}
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=0.5\textwidth]{figures/WN_direction.png}
+% \caption{Norm of parameters with different learning rate.}
+% \label{fig:weightnormgrowingnorm}
+% \end{figure}
+}
+
+\Answer{
+\begin{enumerate}
+    \item {
+    B = 4, C = 2, F= 3
+    \begin{align*}
+    \mu_{batch} &= \frac{1}{B \times F} \sum_{i=1}^B \sum_{j=1}^F x_{ij}
+    \\
+    &= \begin{bmatrix}\frac{1 + 3 + 2 + 3 + 3 + 2 + 4 + 2 + 2 + 3 + 3 + 2}{12} \\ \frac{1 + 2 + 3 + 2 + 4 + 4 + 1 + 2 + 4 + 3 + 3 + 2}{12}\end{bmatrix}
+    \\
+    &= \begin{bmatrix} 2.5 \\ 2.583\end{bmatrix}
+    \\
+    \sigma^2_{batch} &= \frac{1}{B \times F} \sum_{i=1}^B \sum_{j=1}^F (x_{ij} - \mu)^2
+    \\
+    &= \begin{bmatrix}0.5833 \\ 1.0763 \end{bmatrix}
+    \\
+    \mu_{layer} &= \frac{1}{C \times F} \sum_{i=1}^C \sum_{j=1}^F x_{ij}
+    \\
+    &= \begin{bmatrix}\frac{1 + 3 + 2 + 1 + 2 + 3 + 4}{6} & \frac{3 + 3 + 2 + 2 + 4 + 4}{6} & \frac{4 + 2 + 2 + 1 + 2 + 4}{6} & \frac{3 + 3 + 2 + 3 + 3 + 2}{6}\end{bmatrix}
+    \\
+    &= \begin{bmatrix}2.0 & 3.0 & 2.5 & 2.6667\end{bmatrix}
+    \\
+    \sigma^2_{layer} &= \frac{1}{C \times F} \sum_{i=1}^C \sum_{j=1}^F (x_{ij} - \mu)^2
+    \\
+    &= \begin{bmatrix}0.6667 & 0.6667 & 1.25 & 0.2222 \frac{3 + 3 + 2 + 3 + 3 + 2}{6}\end{bmatrix}
+    \\
+    \mu_{instance} &= \frac{1}{F} \sum_{i=1}^F x_{i}
+    \\
+    &= \begin{bmatrix}\begin{bmatrix}\frac{1 + 3 + 2}{3} \\ \frac{1 + 2 + 3}{3} \end{bmatrix}\begin{bmatrix}\frac{3 + 3 + 2}{3} \\ \frac{2 + 4 + 4}{3} \end{bmatrix}\begin{bmatrix}\frac{4 + 2 + 2}{3} \\ \frac{1 + 2 + 4}{3} \end{bmatrix}\begin{bmatrix}\frac{3 + 3 + 2}{3} \\ \frac{3 + 3 + 2}{3} \end{bmatrix}\end{bmatrix}
+    \\
+    &= \begin{bmatrix}\begin{bmatrix}2 \\ 2 \end{bmatrix}\begin{bmatrix}2.6667 \\ 3.333 \end{bmatrix}\begin{bmatrix}2.6667 \\ 2.333 \end{bmatrix}\begin{bmatrix}2.66667 \\ 2.66667 \end{bmatrix}\end{bmatrix}
+    \\
+    \sigma^2_{layer} &= \frac{1}{C \times F} \sum_{i=1}^C \sum_{j=1}^F (x_{ij} - \mu)^2
+    \\
+    &=\begin{bmatrix}\begin{bmatrix}0.6667 \\ 0.6667 \end{bmatrix}\begin{bmatrix}0.2222 \\ 0.8889 \end{bmatrix}\begin{bmatrix}0.8889 \\ 1.5556 \end{bmatrix}\begin{bmatrix}0.2222 \\ 0.2222 \end{bmatrix}\end{bmatrix}
+    \end{align*}
+    }
+    
+    \item {
+    \begin{alignat*}{3}
+    \hat{y} &= \gamma \times \frac{y - \mu_y}{\sigma_y} + \beta
+    \\
+    &= \gamma \times \frac{u^Tx - \mu_y}{\sigma_y} + \beta
+    \\
+    &= \gamma \times \frac{u^Tx}{\sigma_y} + \beta \tab (\expected{x} = 0)
+    \\
+    &= \gamma \times \frac{u^Tx}{\sqrt{Var(y)}} + \beta
+    \\
+    &= \gamma \times \frac{u^Tx}{\sqrt{Var(u^Tx)}} + \beta
+    \\
+    &= \gamma \times \frac{u^Tx}{\sqrt{(u^{2})^T Var(x)}} + \beta \tab (Var(ax) = a^2Var(x))
+    \\
+    &= \gamma \times \frac{u^Tx}{\sqrt{u^Tu \cdot Var(x)}} + \beta
+    \\
+    &= \gamma \times \frac{u^Tx}{\sqrt{u^Tu}} + \beta \tab (Var(x) = I)
+    \\
+    &= \gamma \times \frac{u^Tx}{\norm{u}} + \beta
+    \\
+    &= \gamma \times \frac{u^T}{\norm{u}} \cdot x + \beta
+    \\
+    &= w^T x + \beta
+    \end{alignat*}
+    
+    \item {
+    \begin{alignat*}{3}
+    \pd{L(u, \gamma, \beta)}{u} &= \pd{L(u, \gamma, \beta)}{w}\pd{w}{u}
+    \\
+    &= \nabla_w L \pd{w}{u}
+    \\
+    &= \nabla_w L \pd{}{u} \gamma \frac{u}{\norm{u}}
+    \\
+    &= \gamma \nabla_w L \frac{\norm{u}\pd{u}{u} - \pd{\norm{u}}{u}u}{\norm{u^2}}
+    \\
+    &= \frac{\gamma}{\norm{u}} \nabla_w L \left ( \pd{u}{u} - \frac{u}{\norm{u}}\pd{\norm{u}}{u} \right )
+    \\
+    &= \frac{\gamma}{\norm{u}} \nabla_w L \left ( \pd{u}{u} - \frac{u}{\norm{u}}\frac{u^T}{\norm{u}}\pd{u}{u} \right )
+    \\
+    &= \frac{\gamma}{\norm{u}} \nabla_w L \left ( I - \frac{uu^T}{\norm{u}^2} \cdot I \right )
+    \\
+    &= s W^\perp \nabla_w L \tab[5.0cm] (s = \frac{\gamma}{\norm{u}})
+    \end{alignat*}
+    }
+    }
+\end{enumerate}
+
+}
+\end{exercise}
+
+
+
+\begin{exercise}[7-5-5-3]
+
+\Exercise{
+\label{ex:dropout_weightdecay} The point of this question is to understand and compare the effects of different regularizers (specifically dropout and weight decay) on the weights of a network.
+Consider a linear regression problem with input data $\mX\in\R^{n\times d}$, weights $\vw\in\R^{d\times 1}$ and targets $\vy\in\R^{n\times 1}$. 
+Suppose that dropout is applied to the input (with probability $1-p$ of dropping the unit i.e. setting it to 0).
+Let $\mR\in\R^{n\times d}$ be the dropout mask such that $\mR_{ij}\sim\textnormal{Bern}(p)$ is sampled i.i.d. from the Bernoulli distribution. 
+
+For a squared error loss function with dropout, we then have:
+$$L(\vw)=||\vy-(\mX\odot\mR)\vw||^2$$
+
+\begin{enumerate}[label=\arabic{exercise}.\arabic*]
+\item \label{itm:first}
+Let $\Gamma$ be a diagonal matrix with $\Gamma_{ii}=(\mX^\top\mX)_{ii}^{1/2}$.
+Show that the \textit{expectation (over $\mR$)} of the loss function can be rewritten as $\E[L(\vw)]=||\vy-p\mX\vw||^2+p(1-p)||\Gamma\vw||^2$.
+\emph{Hint: Note we are trying to find the expectation over a squared term and use $\Var(Z) = \E[Z^2] - \E[Z]^2 $.}
+
+\item \label{itm:second}
+Show that the solution $\vw^{\mathrm{dropout}}$ that minimizes the expected loss from question \ref{itm:first} satisfies
+$$p\vw^{\mathrm{dropout}}=(\mX^\top\mX+\lambda^{\mathrm{dropout}}\Gamma^2)^{-1}\mX^\top\vy$$
+where $\lambda^{\mathrm{dropout}}$ is a regularization coefficient depending on $p$. 
+How does the value of $p$ affect the regularization coefficient, $\lambda^{\mathrm{dropout}}$?
+
+\item \label{itm:third}
+Express the loss function for a linear regression problem without dropout and with $L^2$ regularization, with regularization coefficient $\lambda^{L_2}$. Derive its closed form solution $\vw^{L_2}$. 
+
+\item 
+Compare the results of \ref{itm:second} and \ref{itm:third}: identify specific differences in the equations you arrive at, and discuss qualitatively what the equations tell you about the similarities and differences in the effects of weight decay and dropout (1-3 sentences).
+\end{enumerate}
+}
+
+\Answer{
+
+}
+\end{exercise}
+
+
+\end{document}

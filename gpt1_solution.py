@@ -64,6 +64,7 @@ class MultiHeadedAttention(nn.Module):
         self.head_size = head_size
         self.num_heads = num_heads
         self.sequence_length = sequence_length
+        self.batch_size = 16
 
 
         self.feature_input = self.head_size * self.num_heads
@@ -73,6 +74,15 @@ class MultiHeadedAttention(nn.Module):
         self.LinearK = nn.Linear(self.feature_input, self.feature_output)
         self.LinearV = nn.Linear(self.feature_input, self.feature_output)
         self.LinearY = nn.Linear(self.feature_input, self.feature_output)
+
+        # Create mask
+        self.mask = torch.zeros([self.sequence_length, self.sequence_length]).cuda()
+        for i in range(0, self.mask.shape[0]):
+            for j in range(0, self.mask.shape[1]):
+                if (j <= i):
+                    self.mask[i][j] = 1
+
+        #self.mask = self.mask.unsqueeze(0).repeat(self.batch_size, self.num_heads, 1, 1)
 
         #self.LinQ = nn.Linear(head_size * num_heads, head_size * num_heads)
         #self.LinK = nn.Linear(head_size * num_heads, head_size * num_heads)
@@ -137,22 +147,15 @@ class MultiHeadedAttention(nn.Module):
         attn_logits = attn_logits / math.sqrt(d)
 
         # Perform softmax with mask
-
-        # Create mask
-        mask = torch.zeros([attn_logits.shape[2], attn_logits.shape[3]]).cuda()
-        for i in range(0, mask.shape[0]):
-            for j in range(0, mask.shape[1]):
-                if (j <= i):
-                    mask[i][j] = 1
-        mask = mask.unsqueeze(0).repeat(attn_logits.shape[0], attn_logits.shape[1], 1, 1)
+        mask = self.mask.unsqueeze(0).repeat(attn_logits.shape[0], attn_logits.shape[1], 1, 1)
 
         softm_d = torch.exp(attn_logits)
-        softm_d = softm_d * mask
+        softm_d = softm_d * self.mask
         softm_d = torch.sum(softm_d, dim=3)
 
 
-        attn_logits_masked = attn_logits * mask
-        softm_n = attn_logits_masked - (pow(10, 4) * (1 - mask))
+        attn_logits_masked = attn_logits * self.mask
+        softm_n = attn_logits_masked - (pow(10, 4) * (1 - self.mask))
         softm_n = torch.exp(softm_n)
 
         softm_d = softm_d.unsqueeze(3).repeat(1, 1, 1, attn_logits.shape[3])
@@ -512,7 +515,6 @@ class MiniGPT1(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-        device = torch.device('cuda:0')
         vocab_size = log_probas.size(-1)
         mask_re = mask.unsqueeze(2).repeat(1, 1, log_probas.shape[2])
         log_probas_re = log_probas * mask_re

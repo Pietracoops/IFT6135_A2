@@ -43,6 +43,7 @@ EMBEDDINGS_URL = (
 
 def train(epoch, model, dataloader, optimizer, args):
 
+    model.to(args.device)
     model.train()
 
     losses = []
@@ -64,8 +65,6 @@ def train(epoch, model, dataloader, optimizer, args):
         else:
             log_probas = model(batch["source"])
 
-        device = torch.device('cuda:0')
-        log_probas = log_probas.to(device)
         loss = model.loss(log_probas, batch["target"], batch["mask"])
         losses.append(loss.item() * batch["mask"].sum().item())
 
@@ -132,6 +131,7 @@ def evaluate(epoch, model, dataloader, args, mode="val"):
 
 
 def main(args):
+    torch.cuda.set_device('cuda:0')
     # Seed the experiment, for repeatability
     seed_experiment(args.seed)
 
@@ -142,6 +142,7 @@ def main(args):
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=args.num_workers,
+        pin_memory=True
     )
 
     valid_dataset = Wikitext2(args.data_folder, split="validation")
@@ -150,6 +151,7 @@ def main(args):
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.num_workers,
+        pin_memory=True
     )
 
     test_dataset = Wikitext2(args.data_folder, split="test")
@@ -158,6 +160,7 @@ def main(args):
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.num_workers,
+        pin_memory=True
     )
 
     # Download the embeddings

@@ -3,7 +3,7 @@
   "batch_size": 8,
   "model": "gpt1",
   "embeddings": "./data/embeddings.npz",
-  "layers": 4,
+  "layers": 2,
   "epochs": 10,
   "optimizer": "adamw",
   "lr": 0.001,

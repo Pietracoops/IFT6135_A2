@@ -40,7 +40,6 @@ class LayerNorm(nn.Module):
         # ==========================
         # TODO: Write your code here
         # ==========================
-
         mean = inputs.mean(dim=-1, keepdim=True)
         var = ((inputs - mean) ** 2).mean(dim=-1, keepdim=True)
         std = (var + self.eps).sqrt()
@@ -65,14 +64,6 @@ class MultiHeadedAttention(nn.Module):
         self.num_heads = num_heads
         self.sequence_length = sequence_length
         self.batch_size = 16
-
-
-        #self.mask = self.mask.unsqueeze(0).repeat(self.batch_size, self.num_heads, 1, 1)
-
-        #self.LinQ = nn.Linear(head_size * num_heads, head_size * num_heads)
-        #self.LinK = nn.Linear(head_size * num_heads, head_size * num_heads)
-        #self.LinV = nn.Linear(head_size * num_heads, head_size * num_heads)
-        #self.LinY = nn.Linear(head_size * num_heads, head_size * num_heads)
 
         # ==========================
         # TODO: Write your code here
@@ -143,8 +134,6 @@ class MultiHeadedAttention(nn.Module):
         d = queries.size()[-1]
         keys_t = torch.transpose(keys, dim0=2, dim1=3)
         attn_logits = torch.matmul(queries, keys_t)
-        mass1 = attn_logits
-        mass2 = math.sqrt(d)
         attn_logits = attn_logits / math.sqrt(d)
 
         # Perform softmax with mask
@@ -331,6 +320,14 @@ class MultiHeadedAttention(nn.Module):
         Q = self.LinearQ(hidden_states)
         K = self.LinearK(hidden_states)
         V = self.LinearV(hidden_states)
+
+        #Q = F.layer_norm(Q, [Q.shape[2]], eps=0.00001)
+        #K = F.layer_norm(K, [K.shape[2]], eps=0.00001)
+        #V = F.layer_norm(V, [V.shape[2]], eps=0.00001)
+
+        torch.nn.utils.clip_grad_norm_(self.LinearQ.parameters(), 1)
+        torch.nn.utils.clip_grad_norm_(self.LinearK.parameters(), 1)
+        torch.nn.utils.clip_grad_norm_(self.LinearV.parameters(), 1)
 
         Q = self.split_heads(Q)
         K = self.split_heads(K)

@@ -9,7 +9,7 @@ Start-Transcript -path $mydir -append
 
 # Example to get GPU usage counters for a specific process:
 $p = Get-Process pycharm64
-((Get-Counter "\GPU Process Memory(pid_$(9888)*)\Local Usage").CounterSamples | where CookedValue).CookedValue | 
+((Get-Counter "\GPU Process Memory(pid_$(13524)*)\Local Usage").CounterSamples | where CookedValue).CookedValue | 
     foreach {Write-Output "Process $($P.Name) GPU Process Memory $([math]::Round($_/1MB,2)) MB"}
 ((Get-Counter "\GPU Engine(pid_$($p.id)*engtype_3D)\Utilization Percentage").CounterSamples | where CookedValue).CookedValue |
     foreach {Write-Output "Process $($P.Name) GPU Engine Usage $([math]::Round($_,2))%"}

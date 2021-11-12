@@ -1,14 +1,12 @@
-﻿
-**********************
-**********************
+﻿**********************
 Windows PowerShell transcript start
-Start time: 20211112153015
+Start time: 20211112155033
 Username: ZENITH\Massi
 RunAs User: ZENITH\Massi
 Configuration Name: 
 Machine: ZENITH (Microsoft Windows NT 10.0.19042.0)
-Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & 'C:\Users\Massi\OneDrive\Desktop\Masters\IFT6135\Assignements\A2\IFT6135_A2\configs\config_11\memory.ps1'
-Process ID: 15688
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & 'C:\Users\Massi\OneDrive\Desktop\Masters\IFT6135\Assignements\A2\IFT6135_A2\configs\config_12\memory.ps1'
+Process ID: 12824
 PSVersion: 5.1.19041.1320
 PSEdition: Desktop
 PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.19041.1320
@@ -18,11 +16,11 @@ WSManStackVersion: 3.0
 PSRemotingProtocolVersion: 2.3
 SerializationVersion: 1.1.0.1
 **********************
-Transcript started, output file is C:\Users\Massi\OneDrive\Desktop\Masters\IFT6135\Assignements\A2\IFT6135_A2\configs\config_11\GPU-Usage-PS.txt
-Process pycharm64 GPU Process Memory 3525.68 MB
+Transcript started, output file is C:\Users\Massi\OneDrive\Desktop\Masters\IFT6135\Assignements\A2\IFT6135_A2\configs\config_12\GPU-Usage-PS.txt
+Process pycharm64 GPU Process Memory 4069.68 MB
 Process pycharm64 GPU Engine Usage 0%
-Total GPU Process Memory Local Usage: 4008.74 MB
-Total GPU Engine3D Usage: 0.62%
+Total GPU Process Memory Local Usage: 4402.71 MB
+Total GPU Engine3D Usage: 0.54%
 Total GPU Video Decode Usage: 0%
 Total GPU Copy Usage: 0%
 Total GPU Video Processing Usage: 0%
@@ -30,7 +28,7 @@ Total GPU Video Processing Usage: 0%
 
 ==============NVSMI LOG==============
 
-Timestamp                                 : Fri Nov 12 15:30:21 2021
+Timestamp                                 : Fri Nov 12 15:50:40 2021
 Driver Version                            : 496.13
 CUDA Version                              : 11.5
 
@@ -38,14 +36,14 @@ Attached GPUs                             : 1
 GPU 00000000:01:00.0
     FB Memory Usage
         Total                             : 6144 MiB
-        Used                              : 3646 MiB
-        Free                              : 2498 MiB
+        Used                              : 4190 MiB
+        Free                              : 1954 MiB
     BAR1 Memory Usage
         Total                             : 8192 MiB
         Used                              : 1 MiB
         Free                              : 8191 MiB
 ====================== NVIDIA-SMI COMMAND 2 =========================================
-Fri Nov 12 15:30:21 2021
+Fri Nov 12 15:50:40 2021
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 496.13       Driver Version: 496.13       CUDA Version: 11.5     |
 |-------------------------------+----------------------+----------------------+
@@ -54,7 +52,7 @@ Fri Nov 12 15:30:21 2021
 |                               |                      |               MIG M. |
 |===============================+======================+======================|
 |   0  NVIDIA GeForce ... WDDM  | 00000000:01:00.0 Off |                  N/A |
-| N/A   83C    P0   117W /  N/A |   3646MiB /  6144MiB |     97%      Default |
+| N/A   82C    P0   125W /  N/A |   4190MiB /  6144MiB |     98%      Default |
 |                               |                      |                  N/A |
 +-------------------------------+----------------------+----------------------+
 
@@ -63,9 +61,9 @@ Fri Nov 12 15:30:21 2021
 |  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
 |        ID   ID                                                   Usage      |
 |=============================================================================|
-|    0   N/A  N/A      9888      C   ...2\venv\Scripts\python.exe    N/A      |
+|    0   N/A  N/A     13524      C   ...2\venv\Scripts\python.exe    N/A      |
 +-----------------------------------------------------------------------------+
 **********************
 Windows PowerShell transcript end
-End time: 20211112153021
+End time: 20211112155040
 **********************

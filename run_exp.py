@@ -56,8 +56,6 @@ def train(epoch, model, dataloader, optimizer, args):
             dataloader, desc="Epoch {0}".format(epoch), disable=(not args.progress_bar)
         )
     ):
-        if idx == 172:
-            print("hello")
         batch = to_device(batch, args.device)
         optimizer.zero_grad()
 

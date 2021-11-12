@@ -67,6 +67,16 @@ class MultiHeadedAttention(nn.Module):
         self.batch_size = 16
 
 
+        #self.mask = self.mask.unsqueeze(0).repeat(self.batch_size, self.num_heads, 1, 1)
+
+        #self.LinQ = nn.Linear(head_size * num_heads, head_size * num_heads)
+        #self.LinK = nn.Linear(head_size * num_heads, head_size * num_heads)
+        #self.LinV = nn.Linear(head_size * num_heads, head_size * num_heads)
+        #self.LinY = nn.Linear(head_size * num_heads, head_size * num_heads)
+
+        # ==========================
+        # TODO: Write your code here
+        # ==========================
         self.feature_input = self.head_size * self.num_heads
         self.feature_output = self.head_size * self.num_heads
 
@@ -81,17 +91,6 @@ class MultiHeadedAttention(nn.Module):
             for j in range(0, self.mask.shape[1]):
                 if (j <= i):
                     self.mask[i][j] = 1
-
-        #self.mask = self.mask.unsqueeze(0).repeat(self.batch_size, self.num_heads, 1, 1)
-
-        #self.LinQ = nn.Linear(head_size * num_heads, head_size * num_heads)
-        #self.LinK = nn.Linear(head_size * num_heads, head_size * num_heads)
-        #self.LinV = nn.Linear(head_size * num_heads, head_size * num_heads)
-        #self.LinY = nn.Linear(head_size * num_heads, head_size * num_heads)
-
-        # ==========================
-        # TODO: Write your code here
-        # ==========================
 
     def get_attention_weights(self, queries, keys):
         """Compute the attention weights.
@@ -144,6 +143,8 @@ class MultiHeadedAttention(nn.Module):
         d = queries.size()[-1]
         keys_t = torch.transpose(keys, dim0=2, dim1=3)
         attn_logits = torch.matmul(queries, keys_t)
+        mass1 = attn_logits
+        mass2 = math.sqrt(d)
         attn_logits = attn_logits / math.sqrt(d)
 
         # Perform softmax with mask
@@ -336,7 +337,7 @@ class MultiHeadedAttention(nn.Module):
         V = self.split_heads(V)
         output = self.apply_attention(Q, K, V)
         output = self.LinearY(output)
-        #output = F.softmax(output, dim=2)
+        #output = F.log_softmax(output, dim=2)
 
         return output
         pass

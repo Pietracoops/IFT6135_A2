@@ -1,0 +1,39 @@
+BEFORE
+==============NVSMI LOG==============
+
+Timestamp                                 : Thu Nov 11 10:59:19 2021
+Driver Version                            : 496.13
+CUDA Version                              : 11.5
+
+Attached GPUs                             : 1
+GPU 00000000:01:00.0
+    FB Memory Usage
+        Total                             : 8192 MiB
+        Used                              : 617 MiB
+        Free                              : 7575 MiB
+    BAR1 Memory Usage
+        Total                             : 256 MiB
+        Used                              : 2 MiB
+        Free                              : 254 MiB
+		
+AFTER
+
+==============NVSMI LOG==============
+
+Timestamp                                 : Thu Nov 11 11:01:22 2021
+Driver Version                            : 496.13
+CUDA Version                              : 11.5
+
+Attached GPUs                             : 1
+GPU 00000000:01:00.0
+    FB Memory Usage
+        Total                             : 8192 MiB
+        Used                              : 5662 MiB
+        Free                              : 2530 MiB
+    BAR1 Memory Usage
+        Total                             : 256 MiB
+        Used                              : 2 MiB
+        Free                              : 254 MiB
+		
+		
+	

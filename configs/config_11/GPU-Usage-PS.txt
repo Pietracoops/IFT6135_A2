@@ -1,0 +1,86 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20211111132154
+Username: TITAN\massimo
+RunAs User: TITAN\massimo
+Configuration Name: 
+Machine: TITAN (Microsoft Windows NT 10.0.19042.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command if((Get-ExecutionPolicy ) -ne 'AllSigned') { Set-ExecutionPolicy -Scope Process Bypass }; & 'C:\Users\massimo\Desktop\Masters\IFT6135\Assignements\A2\IFT6135-HW2-code_template\IFT6135_A2\configs\config_11\memory.ps1'
+Process ID: 16056
+PSVersion: 5.1.19041.1237
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.19041.1237
+BuildVersion: 10.0.19041.1237
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Users\massimo\Desktop\Masters\IFT6135\Assignements\A2\IFT6135-HW2-code_template\IFT6135_A2\configs\config_11\GPU-Usage-PS.txt
+Process pycharm64 GPU Process Memory 5497.73 MB
+Process pycharm64 GPU Engine Usage 0%
+Total GPU Process Memory Local Usage: 5914.59 MB
+Total GPU Engine3D Usage: 5.84%
+Total GPU Video Decode Usage: 0%
+Total GPU Copy Usage: 53.1%
+Total GPU Video Processing Usage: 0%
+====================== NVIDIA-SMI COMMAND 1 =========================================
+
+==============NVSMI LOG==============
+
+Timestamp                                 : Thu Nov 11 13:22:00 2021
+Driver Version                            : 496.13
+CUDA Version                              : 11.5
+
+Attached GPUs                             : 1
+GPU 00000000:01:00.0
+    FB Memory Usage
+        Total                             : 8192 MiB
+        Used                              : 6181 MiB
+        Free                              : 2011 MiB
+    BAR1 Memory Usage
+        Total                             : 256 MiB
+        Used                              : 2 MiB
+        Free                              : 254 MiB
+====================== NVIDIA-SMI COMMAND 2 =========================================
+Thu Nov 11 13:22:00 2021
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 496.13       Driver Version: 496.13       CUDA Version: 11.5     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name            TCC/WDDM | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA GeForce ... WDDM  | 00000000:01:00.0  On |                  N/A |
+| 38%   60C    P2   113W / 166W |   6181MiB /  8192MiB |     99%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|    0   N/A  N/A      1564    C+G   ...nputApp\TextInputHost.exe    N/A      |
+|    0   N/A  N/A      1728    C+G   ...wekyb3d8bbwe\Video.UI.exe    N/A      |
+|    0   N/A  N/A      2668    C+G   ...bbwe\Microsoft.Photos.exe    N/A      |
+|    0   N/A  N/A      3376    C+G   ...ekyb3d8bbwe\YourPhone.exe    N/A      |
+|    0   N/A  N/A      3996    C+G   ...y\ShellExperienceHost.exe    N/A      |
+|    0   N/A  N/A      4876    C+G   ...ressvpn-ui\ExpressVPN.exe    N/A      |
+|    0   N/A  N/A      6496    C+G   ...8bbwe\Microsoft.Notes.exe    N/A      |
+|    0   N/A  N/A      6500    C+G   ...artMenuExperienceHost.exe    N/A      |
+|    0   N/A  N/A      6916    C+G   ...lPanel\SystemSettings.exe    N/A      |
+|    0   N/A  N/A      7456    C+G   Insufficient Permissions        N/A      |
+|    0   N/A  N/A      9624    C+G   C:\Windows\explorer.exe         N/A      |
+|    0   N/A  N/A      9748      C   ...2\venv\Scripts\python.exe    N/A      |
+|    0   N/A  N/A     10640    C+G   ...8wekyb3d8bbwe\Cortana.exe    N/A      |
+|    0   N/A  N/A     11812    C+G   ...5n1h2txyewy\SearchApp.exe    N/A      |
+|    0   N/A  N/A     12208    C+G   Insufficient Permissions        N/A      |
+|    0   N/A  N/A     15196    C+G   ...cw5n1h2txyewy\LockApp.exe    N/A      |
+|    0   N/A  N/A     17152    C+G   ...8bbwe\WindowsTerminal.exe    N/A      |
+|    0   N/A  N/A     18164    C+G   ...s\Messenger\Messenger.exe    N/A      |
++-----------------------------------------------------------------------------+
+**********************
+Windows PowerShell transcript end
+End time: 20211111132200
+**********************

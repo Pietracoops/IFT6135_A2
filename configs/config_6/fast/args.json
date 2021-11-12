@@ -1,9 +1,9 @@
 {
   "data_folder": "./data",
   "batch_size": 16,
-  "model": "lstm",
+  "model": "gpt1",
   "embeddings": "./data/embeddings.npz",
-  "layers": 4,
+  "layers": 1,
   "epochs": 10,
   "optimizer": "adamw",
   "lr": 0.001,
